@@ -29,6 +29,9 @@ jobs:
       - name: rust stable
         uses: dtolnay/rust-toolchain@stable
 
+      - name: installa dipendenze npm (tauri-action non lo fa da solo)
+        run: npm ci
+
       - name: dipendenze linux (webkitgtk, gtk3, alsa, pixbuf)
         if: matrix.platform == 'ubuntu-22.04'
         run: |
