@@ -2,6 +2,7 @@
   "name": "daprod-avatar",
   "private": true,
   "scripts": {
+    "tauri": "tauri",
     "build": "tauri build --bundles appimage"
   },
   "devDependencies": {
