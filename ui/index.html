@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <title>DaProd Avatar</title>
+  <link rel="stylesheet" href="app.css?v=0.6.0b">
+</head>
+<body data-modo="mini">
+  <div id="finestra">
+
+    <div class="barra" id="barra">
+      <span class="titolo">DaProdProduzioni <b id="versione"></b></span>
+      <span class="pulsanti">
+        <button id="cambia" title="Cambia personaggio">&#x27F3;</button>
+        <button id="eterea" title="Modalità eterea: attraversabile dai clic (esci dall'icona nella barra)">&#128123;</button>
+        <button id="impostazioni" title="Impostazioni">&#9881;</button>
+        <button id="espandi" title="Espandi / riduci">&#x2922;</button>
+        <button id="chiudi" title="Torna mini / minimizza">&times;</button>
+      </span>
+    </div>
+
+    <div id="riga-pannello">
+      <div id="zona-avatar">
+        <canvas id="avatar" width="288" height="288" title="Clic: pausa/riprendi — trascina: sposta"></canvas>
+        <div id="mini-prog"><div id="mini-riemp"></div></div>
+        <div id="controlli-audio" title="Passa vicino all'avatar per vederli">
+          <div class="ca-pulsanti">
+            <button id="ca-indietro" title="Indietro 10 s">&#x23EA;</button>
+            <button id="ca-gioca" title="Pausa / riprendi">&#x23F8;</button>
+            <button id="ca-avanti" title="Avanti 10 s">&#x23E9;</button>
+            <button id="ca-stop" title="Ferma">&#x23F9;</button>
+          </div>
+          <div class="ca-pulsanti ca-seconda">
+            <button id="ca-screenshot" title="Screenshot ad area">&#128247;</button>
+            <button id="ca-eterea" title="Modalità eterea">&#128123;</button>
+            <button id="ca-impostazioni" title="Impostazioni">&#9881;</button>
+            <button id="ca-espandi" title="Espandi / riduci">&#x2922;</button>
+          </div>
+          <div id="ca-barra" title="Clic: salta al punto"><div id="ca-riemp"></div></div>
+          <div class="ca-riga-tempi">
+            <span id="ca-tempo">0:00</span>
+            <input id="ca-vol" type="range" min="0" max="100" value="90" title="Volume">
+          </div>
+        </div>
+      </div>
+      <div id="tabs">
+        <button data-tab="file" class="attivo">File</button>
+        <button data-tab="cassetti">Cassetti</button>
+        <button data-tab="converti">Converti</button>
+        <button data-tab="modifica">Modifica</button>
+        <button data-tab="appunti">Appunti</button>
+        <button data-tab="ai">AI &#10022;</button>
+      </div>
+    </div>
+
+    <div id="vuoto">Trascina un file qui</div>
+
+    <div id="pannello">
+
+      <div id="tab-file" class="pag-tab attiva">
+        <div id="schede"></div>
+      </div>
+
+      <div id="tab-cassetti" class="pag-tab">
+        <div id="lista-cassetti"></div>
+        <div class="testata-cassetto">
+          <span id="nome-cassetto"></span>
+          <span class="azioni-cassetto">
+            <button id="nuovo-cassetto" title="Nuovo cassetto">+</button>
+            <button id="rinomina-cassetto" title="Rinomina (o doppio clic sul cassetto)">&#9998;</button>
+            <button id="elimina-cassetto" title="Elimina il cassetto (deve essere vuoto)">&#128465;</button>
+            <button id="apri-cartella" title="Apri la cartella nel file manager">&#128193;</button>
+          </span>
+        </div>
+        <div id="griglia-file"></div>
+        <div class="suggerimento">Trascina qui i file per copiarli nel cassetto aperto</div>
+      </div>
+
+      <div id="tab-converti" class="pag-tab">
+        <div id="lista-conversione"></div>
+        <div class="suggerimento">Trascina qui i file da convertire. Lo slider sceglie il peso massimo; il risultato esce accanto all'originale col nome <b>…-DaPConvertito</b></div>
+      </div>
+
+      <div id="tab-modifica" class="pag-tab">
+        <div id="editor"></div>
+        <div class="suggerimento">Trascina qui un file, oppure usa &#9998; nei cassetti</div>
+      </div>
+
+      <div id="tab-appunti" class="pag-tab">
+        <div class="testata-cassetto">
+          <span>Storia dei copia-incolla</span>
+          <span class="azioni-cassetto">
+            <button id="svuota-appunti" title="Svuota la storia">&#128465;</button>
+          </span>
+        </div>
+        <div id="lista-appunti"></div>
+        <div class="suggerimento">Clic su una voce: torna negli appunti. La storia resta salvata tra le sessioni.</div>
+      </div>
+
+      <div id="tab-impostazioni" class="pag-tab">
+        <div class="editor-scheda">
+          <div class="imp-riga">
+            <span class="imp-etichetta">Scorciatoia screenshot</span>
+            <b id="imp-scorciatoia-attuale">nessuna</b>
+          </div>
+          <div class="imp-riga">
+            <button id="imp-registra">Scegli un tasto</button>
+            <button id="imp-prova">Prova adesso</button>
+            <button id="imp-togli">Togli</button>
+          </div>
+          <div class="suggerimento" style="text-align:left">Clic «Registra», poi premi la combinazione (es. Ctrl+Alt+S): lo screenshot ad area partirà da qualsiasi punto del sistema. Il file finisce in <b>Libreria/Schermate</b> e negli appunti. Al primo bind KDE può chiedere il permesso.</div>
+
+          <div class="imp-riga">
+            <span class="imp-etichetta">Modalità eterea</span>
+            <label class="interruttore"><input type="checkbox" id="imp-eterea"> attraversabile dai clic</label>
+          </div>
+          <div class="suggerimento" style="text-align:left">Quando è attiva, clic e drag attraversano l'avatar. Per disattivarla: clicca l'icona di DaProd nella barra delle applicazioni (o riapri DaProd).</div>
+
+          <div class="imp-riga">
+            <span class="imp-etichetta">Sempre in primo piano</span>
+            <label class="interruttore"><input type="checkbox" id="imp-sopra" checked> attiva</label>
+          </div>
+
+          <div class="imp-riga">
+            <span class="imp-etichetta">Aprire i file con noi</span>
+            <button id="imp-associa">Associa i file</button>
+          </div>
+          <div class="suggerimento" style="text-align:left">Rende DaProdProduzioni l'app predefinita per audio, video, immagini, testi e PDF: doppio clic in Dolphin e il file si apre qui.</div>
+
+          <div class="imp-riga">
+            <span class="imp-etichetta">Versione</span>
+            <b id="imp-versione"></b>
+          </div>
+          <div class="imp-riga">
+            <button id="imp-esci" class="pericoloso">Esci da DaProd</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="tab-ai" class="pag-tab">
+        <p class="ai-presto">Le funzioni &#10022; arrivano per ultime, come deciso. Qui ci saranno trascrizione, OCR e decisioni locali — tutto sul tuo PC.</p>
+      </div>
+
+    </div>
+
+    <div id="menu-contesto" hidden></div>
+    <div id="debug"></div>
+  </div>
+  <script src="icone.js?v=0.6.0b"></script>
+  <script src="app.js?v=0.6.0b"></script>
+</body>
+</html>
