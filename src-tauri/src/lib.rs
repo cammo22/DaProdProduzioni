@@ -960,6 +960,38 @@ fn screenshot_area(app: AppHandle) -> Result<String, String> {
     fai_screenshot(app)
 }
 
+/// Mette un'immagine (per es. quella uscita dall'editor) negli appunti.
+#[tauri::command]
+#[cfg(target_os = "linux")]
+fn copia_immagine_appunti(path: String) -> Result<(), String> {
+    let p = PathBuf::from(&path);
+    if !p.is_file() {
+        return Err("il file non esiste".into());
+    }
+    copy_image_to_clipboard(&p)
+}
+
+#[tauri::command]
+#[cfg(not(target_os = "linux"))]
+fn copia_immagine_appunti(_path: String) -> Result<(), String> {
+    Err("appunti immagini: per ora solo Linux".into())
+}
+
+/// Salva byte (PNG uscito dal canvas) dentro la libreria: mai fuori.
+#[tauri::command]
+fn salva_binario(path: String, bytes: Vec<u8>) -> Result<String, String> {
+    let root = library_root();
+    let p = PathBuf::from(&path);
+    if !inside_library(&root, &p) {
+        return Err("si salva solo dentro la libreria DaProd".into());
+    }
+    if let Some(parent) = p.parent() {
+        std::fs::create_dir_all(parent).map_err(|e| e.to_string())?;
+    }
+    std::fs::write(&p, bytes).map_err(|e| e.to_string())?;
+    Ok(p.to_string_lossy().to_string())
+}
+
 #[tauri::command]
 #[cfg(not(target_os = "linux"))]
 fn screenshot_area(_app: AppHandle) -> Result<String, String> {
@@ -1587,6 +1619,8 @@ pub fn run() {
             registra_scorciatoia,
             rimuovi_scorciatoia,
             screenshot_area,
+            copia_immagine_appunti,
+            salva_binario,
             esci_app,
             associa_file
         ])

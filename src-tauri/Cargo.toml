@@ -1,6 +1,6 @@
 [package]
 name = "daprod-avatar"
-version = "0.6.0"
+version = "0.7.0"
 description = "DaProd Avatar: piccolo sul desktop, si espande quando serve. Cassetti, conversioni, editing."
 edition = "2021"
 rust-version = "1.77"

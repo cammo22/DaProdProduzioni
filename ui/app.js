@@ -1079,6 +1079,53 @@ async function registraScorciatoia() {
   }, 15000);
 }
 
+// ---------------------------------------------------------------- screenshot: toast ed editor
+
+let ultimoScreenshot = null;
+let toastTimer = null;
+let eiStorico = [];
+let eiGomma = false;
+let eiTratto = false;
+
+function mostraToastScreenshot() {
+  const t = $("toast-screenshot");
+  $("toast-testo").textContent = "Screenshot salvato in Schermate";
+  t.hidden = false;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { t.hidden = true; }, 6000);
+}
+
+async function apriEditorImmagine(percorso) {
+  await espandi(); // l'editor serve grande
+  const overlay = $("editor-immagine");
+  overlay.hidden = false;
+  const tela = $("ei-tela");
+  tela.dataset.path = percorso;
+  eiStorico = [];
+  eiGomma = false;
+  $("ei-gomma").classList.remove("attivo");
+  const img = new Image();
+  img.onload = () => {
+    tela.width = img.width;
+    tela.height = img.height;
+    tela.getContext("2d").drawImage(img, 0, 0);
+  };
+  img.onerror = () => { overlay.hidden = true; debug("immagine non apribile nell'editor"); };
+  img.src = convertFileSrc(percorso);
+}
+
+function eiPunto(e, tela) {
+  const r = tela.getBoundingClientRect();
+  return {
+    x: (e.clientX - r.left) * (tela.width / r.width),
+    y: (e.clientY - r.top) * (tela.height / r.height),
+  };
+}
+
+function eiBlobPng(tela) {
+  return new Promise((ok) => tela.toBlob(ok, "image/png"));
+}
+
 // ---------------------------------------------------------------- ciclo e avvio
 
 async function polla() {
@@ -1317,6 +1364,78 @@ async function avvia() {
     b.disabled = false;
   };
 
+  // ---- toast screenshot ed editor immagini
+  $("toast-chiudi").onclick = () => { $("toast-screenshot").hidden = true; };
+  $("toast-modifica").onclick = () => {
+    $("toast-screenshot").hidden = true;
+    if (ultimoScreenshot) apriEditorImmagine(ultimoScreenshot);
+  };
+  const tela = $("ei-tela");
+  const ctxT = () => tela.getContext("2d");
+  $("ei-chiudi").onclick = () => { $("editor-immagine").hidden = true; };
+  $("ei-gomma").onclick = () => {
+    eiGomma = !eiGomma;
+    $("ei-gomma").classList.toggle("attivo", eiGomma);
+  };
+  $("ei-annulla").onclick = () => {
+    const snap = eiStorico.pop();
+    if (snap) ctxT().putImageData(snap, 0, 0);
+  };
+  tela.addEventListener("pointerdown", (e) => {
+    eiTratto = true;
+    tela.setPointerCapture(e.pointerId);
+    eiStorico.push(ctxT().getImageData(0, 0, tela.width, tela.height));
+    if (eiStorico.length > 25) eiStorico.shift();
+    const p = eiPunto(e, tela);
+    ctxT().beginPath();
+    ctxT().moveTo(p.x, p.y);
+  });
+  tela.addEventListener("pointermove", (e) => {
+    if (!eiTratto) return;
+    const c = ctxT();
+    const p = eiPunto(e, tela);
+    c.lineCap = "round";
+    c.lineJoin = "round";
+    c.lineWidth = parseFloat($("ei-spess").value) || 4;
+    if (eiGomma) {
+      c.globalCompositeOperation = "destination-out";
+      c.strokeStyle = "rgba(0,0,0,1)";
+    } else {
+      c.globalCompositeOperation = "source-over";
+      c.strokeStyle = $("ei-colore").value;
+    }
+    c.lineTo(p.x, p.y);
+    c.stroke();
+  });
+  const fineTratto = () => { eiTratto = false; };
+  tela.addEventListener("pointerup", fineTratto);
+  tela.addEventListener("pointercancel", fineTratto);
+  $("ei-copia").onclick = async () => {
+    try {
+      const blob = await eiBlobPng(tela);
+      const bytes = new Uint8Array(await blob.arrayBuffer());
+      const root = await invoke("percorso_libreria", { drawer: null });
+      const tmp = await invoke("salva_binario", {
+        path: root + "/.daprod/tmp/modifica.png",
+        bytes: Array.from(bytes),
+      });
+      await invoke("copia_immagine_appunti", { path: tmp });
+      debug("immagine modificata negli appunti: Ctrl+V dove vuoi");
+    } catch (e) { debug("copia: " + e); }
+  };
+  $("ei-salva").onclick = async () => {
+    try {
+      const blob = await eiBlobPng(tela);
+      const bytes = new Uint8Array(await blob.arrayBuffer());
+      const root = await invoke("percorso_libreria", { drawer: null });
+      const out = await invoke("salva_binario", {
+        path: root + "/Schermate/Schermata-mod-" + Date.now() + ".png",
+        bytes: Array.from(bytes),
+      });
+      debug("salvata: " + out);
+    } catch (e) { debug("salva: " + e); }
+  };
+
   // ---- trascinamento finestra: dalla barra, e dall'avatar (con soglia).
   // Doppio clic sull'avatar in mini: espandi.
   $("barra").addEventListener("mousedown", (e) => {
@@ -1324,6 +1443,25 @@ async function avvia() {
   });
   let premuto = null;
   const zona = $("zona-avatar");
+
+  // La striscia vive solo finché il mouse sta davvero vicino: classe + timer.
+  // Su XWayland il :hover puro resta incastrato quando il cursore esce dalla
+  // finestra senza mandare l'evento di uscita.
+  let timerStrip = null;
+  const stripViva = () => {
+    zona.classList.add("mostra");
+    clearTimeout(timerStrip);
+    timerStrip = setTimeout(() => zona.classList.remove("mostra"), 900);
+  };
+  const stripMorta = () => {
+    clearTimeout(timerStrip);
+    zona.classList.remove("mostra");
+  };
+  zona.addEventListener("mousemove", stripViva);
+  zona.addEventListener("mouseenter", stripViva);
+  document.addEventListener("mouseleave", stripMorta);
+  window.addEventListener("blur", stripMorta);
+
   zona.addEventListener("mousedown", (e) => {
     premuto = { x: e.screenX, y: e.screenY, mosso: false };
   });
@@ -1442,7 +1580,11 @@ async function avvia() {
     });
   } catch (e) { debug("listen appunti: " + e); }
   try {
-    await listen("screenshot-fatto", (ev) => debug("screenshot salvato: " + ev.payload));
+    await listen("screenshot-fatto", (ev) => {
+      debug("screenshot salvato: " + ev.payload);
+      ultimoScreenshot = ev.payload;
+      mostraToastScreenshot();
+    });
     await listen("scorciatoia-errore", (ev) => debug("scorciatoia: " + ev.payload));
   } catch (e) { debug("listen screenshot: " + e); }
 

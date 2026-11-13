@@ -183,7 +183,7 @@ body.suona #mini-prog { visibility: visible; }
   pointer-events: none;
   transition: opacity 0.15s ease;
 }
-#zona-avatar:hover #controlli-audio { opacity: 1; pointer-events: auto; }
+#zona-avatar.mostra #controlli-audio { opacity: 1; pointer-events: auto; }
 
 /* mini: niente scatola attorno, solo pulsanti fluttuanti sul desktop */
 body[data-modo="mini"] #controlli-audio {
@@ -685,6 +685,92 @@ textarea.edit-testo {
   cursor: pointer;
 }
 #menu-contesto button:hover { background: rgba(255, 213, 74, 0.16); color: var(--oro); }
+
+/* ---- toast screenshot ---- */
+#toast-screenshot {
+  position: fixed;
+  left: 50%;
+  bottom: 14px;
+  transform: translateX(-50%);
+  z-index: 300;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  background: rgba(20, 14, 34, 0.96);
+  border: 1px solid var(--bordo);
+  border-radius: 12px;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  animation: entra 0.18s ease;
+}
+#toast-screenshot[hidden] { display: none; }
+#toast-testo { font-size: 11px; color: var(--testo); }
+#toast-screenshot button {
+  background: rgba(255, 213, 74, 0.14);
+  border: 1px solid var(--bordo);
+  color: var(--oro);
+  border-radius: 8px;
+  font-size: 11px;
+  padding: 4px 10px;
+  cursor: pointer;
+}
+#toast-screenshot button:hover { background: rgba(255, 213, 74, 0.28); }
+#toast-chiudi { background: transparent !important; border: none !important; color: var(--testo-2) !important; font-size: 14px; width: 20px; padding: 0 !important; }
+
+/* ---- editor immagini (overlay) ---- */
+#editor-immagine {
+  position: fixed;
+  inset: 0;
+  z-index: 400;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 10px;
+  background: rgba(9, 8, 13, 0.88);
+  backdrop-filter: blur(8px);
+}
+#editor-immagine[hidden] { display: none; }
+.ei-barra {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 6px 10px;
+  background: rgba(20, 14, 34, 0.95);
+  border: 1px solid var(--bordo);
+  border-radius: 12px;
+}
+.ei-titolo { font-size: 12px; font-weight: 600; color: var(--oro); margin-right: 6px; }
+.ei-barra input[type="color"] {
+  width: 30px;
+  height: 26px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
+.ei-barra input[type="range"] { width: 90px; accent-color: var(--oro); }
+.ei-barra button {
+  background: rgba(255, 213, 74, 0.14);
+  border: 1px solid var(--bordo);
+  color: var(--oro);
+  border-radius: 8px;
+  font-size: 11px;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+.ei-barra button:hover { background: rgba(255, 213, 74, 0.28); }
+.ei-barra button.attivo { background: var(--oro); color: #1a1428; }
+#ei-chiudi { background: transparent; border: none; color: var(--testo-2); font-size: 15px; width: 24px; padding: 0; }
+#ei-tela {
+  max-width: 100%;
+  max-height: calc(100vh - 70px);
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 8px;
+  cursor: crosshair;
+  touch-action: none;
+}
 
 /* ---- appunti ---- */
 #lista-appunti { display: flex; flex-direction: column; gap: 6px; }

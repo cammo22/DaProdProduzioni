@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <title>DaProd Avatar</title>
-  <link rel="stylesheet" href="app.css?v=0.6.0b">
+  <link rel="stylesheet" href="app.css?v=0.7.0">
 </head>
 <body data-modo="mini">
   <div id="finestra">
@@ -143,10 +143,30 @@
 
     </div>
 
+    <div id="toast-screenshot" hidden>
+      <span id="toast-testo">Screenshot salvato</span>
+      <button id="toast-modifica">Modifica</button>
+      <button id="toast-chiudi" title="Chiudi">&times;</button>
+    </div>
+
+    <div id="editor-immagine" hidden>
+      <div class="ei-barra">
+        <span class="ei-titolo">Modifica immagine</span>
+        <input type="color" id="ei-colore" value="#ffd54a" title="Colore della penna">
+        <input type="range" id="ei-spess" min="1" max="40" value="4" title="Spessore">
+        <button id="ei-gomma" title="Gomma">Gomma</button>
+        <button id="ei-annulla" title="Annulla l'ultimo tratto">Undo</button>
+        <button id="ei-copia" title="Copia negli appunti senza salvare">Copia</button>
+        <button id="ei-salva" title="Salva in Libreria/Schermate">Salva</button>
+        <button id="ei-chiudi" title="Chiudi">&times;</button>
+      </div>
+      <canvas id="ei-tela"></canvas>
+    </div>
+
     <div id="menu-contesto" hidden></div>
     <div id="debug"></div>
   </div>
-  <script src="icone.js?v=0.6.0b"></script>
-  <script src="app.js?v=0.6.0b"></script>
+  <script src="icone.js?v=0.7.0"></script>
+  <script src="app.js?v=0.7.0"></script>
 </body>
 </html>
